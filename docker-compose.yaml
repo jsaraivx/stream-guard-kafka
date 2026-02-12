@@ -2,11 +2,12 @@ services:
   kafka:
     image: apache/kafka:latest
     container_name: stream-guard-kafka
+    user: root
     ports:
       - "9092:9092"
       - "29092:29092"
     environment:
-      KAFKA_CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: controller,broker
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -19,14 +20,102 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka_data:/tmp/kraft-combined-logs
+    networks:
+      - stream-guard-network
+    # healthcheck:
+    #   test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 20s
 
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: stream-guard-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: fraud_detection
+      POSTGRES_USER: streamguard
+      POSTGRES_PASSWORD: streamguard_2024
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stream-guard-network
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U streamguard -d fraud_detection"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  # ksqlDB Server - Stream Processing Engine
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    container_name: stream-guard-ksqldb-server
+    restart: on-failure
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:9092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_SERVICE_ID: stream_guard_ksql_
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+      KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 2
+      KSQL_KSQL_QUERIES_FILE: /opt/ksqldb/queries/init.sql
+    volumes:
+      - ./ksqldb:/opt/ksqldb/queries
+    depends_on:
+      - kafka
+    networks:
+      - stream-guard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ksqlDB CLI - Interactive Query Interface
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:0.29.0
+    container_name: stream-guard-ksqldb-cli
+    depends_on:
+      - ksqldb-server
+    networks:
+      - stream-guard-network
+    entrypoint: /bin/sh
+    tty: true
+
+  # Kafka UI - Monitoring Interface
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: stream-guard-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: stream-guard-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: http://ksqldb-server:8088
+      DYNAMIC_CONFIG_ENABLED: "true"
     depends_on:
       - kafka
-    ports:
-      - 8080:8080
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local-kafka
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - stream-guard-network
+
+volumes:
+  kafka_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  stream-guard-network:
+    driver: bridge
