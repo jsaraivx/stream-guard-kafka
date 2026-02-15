@@ -17,3 +17,12 @@ CREATE STREAM IF NOT EXISTS transactions_stream (
     PARTITIONS = 3,
     REPLICAS = 1
 );
+
+CREATE TABLE user_velocity_stats AS
+SELECT 
+    account_id,
+    COUNT(*) as tx_count_1min,
+    SUM(amount) as total_amount_10min
+FROM transactions_stream
+WINDOW TUMBLING (SIZE 1 MINUTE)
+GROUP BY account_id;
