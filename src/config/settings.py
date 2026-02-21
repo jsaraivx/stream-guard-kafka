@@ -86,6 +86,19 @@ class FraudDetectionSettings(BaseSettings):
     )
 
 
+class FraudSettings(BaseSettings):
+    """Fraud engine configuration."""
+
+    max_amount: float = 5000.00
+    blacklisted_merchants: List[str] = []
+    blacklisted_accounts: List[str] = []
+
+    model_config = SettingsConfigDict(
+        env_prefix="FRAUD_",
+        case_sensitive=False
+    )
+
+
 class Settings(BaseSettings):
     """Main application settings."""
 
@@ -98,6 +111,7 @@ class Settings(BaseSettings):
     database: DatabaseSettings = DatabaseSettings()
     producer: ProducerSettings = ProducerSettings()
     fraud_detection: FraudDetectionSettings = FraudDetectionSettings()
+    fraud: FraudSettings = FraudSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -109,3 +123,4 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
