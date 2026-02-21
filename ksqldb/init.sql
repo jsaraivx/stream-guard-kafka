@@ -14,7 +14,7 @@ CREATE STREAM IF NOT EXISTS transactions_stream (
 ) WITH (
     KAFKA_TOPIC = 'transactions',
     VALUE_FORMAT = 'JSON',
-    PARTITIONS = 3,
+    PARTITIONS = 1,
     REPLICAS = 1
 );
 
@@ -22,7 +22,7 @@ CREATE STREAM IF NOT EXISTS high_amount_alerts
 WITH (
     KAFKA_TOPIC = 'fraud_alerts',
     VALUE_FORMAT = 'JSON',
-    PARTITIONS = 3,
+    PARTITIONS = 1,
     REPLICAS = 1
 )
 AS
@@ -42,7 +42,7 @@ CREATE STREAM IF NOT EXISTS night_alerts
 WITH (
     KAFKA_TOPIC = 'fraud_alerts',
     VALUE_FORMAT = 'JSON',
-    PARTITIONS = 3,
+    PARTITIONS = 1,
     REPLICAS = 1
 )
 AS
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS high_velocity_alerts
 WITH (
     KAFKA_TOPIC = 'fraud_alerts',
     VALUE_FORMAT = 'JSON',
-    PARTITIONS = 3,
+    PARTITIONS = 1,
     REPLICAS = 1
 )
 AS
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS high_velocity_amount_alerts
 WITH (
     KAFKA_TOPIC = 'fraud_alerts',
     VALUE_FORMAT = 'JSON',
-    PARTITIONS = 3,
+    PARTITIONS = 1,
     REPLICAS = 1
 )
 AS
