@@ -69,9 +69,8 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 2
-      KSQL_KSQL_QUERIES_FILE: /opt/ksqldb/queries/init.sql
     volumes:
-      - ./ksqldb:/opt/ksqldb/queries
+      - ./ksqldb:/ksqldb
     depends_on:
       - kafka
     networks:
@@ -81,7 +80,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   # ksqlDB CLI - Interactive Query Interface
   ksqldb-cli:
@@ -92,6 +91,9 @@ services:
     networks:
       - stream-guard-network
     entrypoint: /bin/sh
+    command: -c "echo 'Waiting for ksqlDB...' && sleep 15 && ksql http://ksqldb-server:8088 --file /ksqldb/init.sql && tail -f /dev/null"
+    volumes:
+      - ./ksqldb:/ksqldb
     tty: true
 
   # Kafka UI - Monitoring Interface

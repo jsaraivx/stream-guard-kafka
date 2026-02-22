@@ -115,20 +115,19 @@ Each generated transaction has the following format:
 - 70%: R$ 3,000 - R$ 15,000 (above threshold)
 - 30%: R$ 500 - R$ 3,000 (attempting to avoid detection)
 
-## 🧪 Demo Script
+## 🧪 Interactive CLI Menu
 
-Run the demo script to see all features:
+Run the generator manually to see all features:
 
 ```bash
-python demo_fake_generator.py
+python generate_transactions.py
 ```
 
-The script demonstrates:
-1. Basic and batch generation
-2. Time series
-3. Specific account activity
-4. File saving
-5. Generated transaction statistics
+The script will present a menu allowing you to:
+1. Run Continuous Daemon Mode (Default Pipeline)
+2. Send a Burst of X transactions instantly
+3. Send X transactions uniformly (Specific TPS)
+4. Stream random realistic bank volume for Y seconds
 
 ## 🔧 Main Parameters
 

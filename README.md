@@ -99,9 +99,18 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-4. **Start Infrastructure:**
+4. **Start Infrastructure & Background Pipeline:**
 ```bash
-docker-compose up -d
+# Starts Docker, configures ksqlDB, and runs Python consumers/producers in background.
+# You will be prompted at the end to view live logs.
+./start.sh
+```
+
+5. **Stop Infrastructure & Clean Data:**
+```bash
+# Stops Python background processes and Docker containers.
+# You will be prompted if you want to wipe PostgreSQL/Kafka data volumes.
+./stop.sh
 ```
 
 5. **Access Services:**
@@ -133,11 +142,8 @@ stream-guard-kafka/
 
 ### 1. Generate Fake Transactions
 ```bash
-# Demo: Generate and view fake data
-python demo_fake_generator.py
-
-# Send batch to Kafka
-python demo_kafka_producer.py
+# Run the interactive generator (Menu for Batch, Stream, Velocity)
+python generate_transactions.py
 ```
 
 ### 2. Monitor with Kafka-UI
