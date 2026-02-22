@@ -46,7 +46,7 @@ echo "✅ Consumer running (PID: $CONSUMER_PID) | Logs saved to: $LOG_CONSUMER"
 sleep 3 
 
 echo "[4/4] 💸 Starting Data Generator (in background)..."
-python generate_transactions.py > "$LOG_PRODUCER" 2>&1 &
+python generate_transactions.py --daemon > "$LOG_PRODUCER" 2>&1 &
 PRODUCER_PID=$!
 echo "✅ Producer running (PID: $PRODUCER_PID) | Logs saved to: $LOG_PRODUCER"
 
@@ -54,11 +54,22 @@ echo "✅ Producer running (PID: $PRODUCER_PID) | Logs saved to: $LOG_PRODUCER"
 echo "========================================"
 echo "🎉 PIPELINE AND VIRTUALIZERS STARTED!"
 echo "========================================"
-echo ""
-echo "📝 To see logs in real-time, use these commands in other terminal tabs:"
-echo "   tail -f $LOG_CONSUMER"
-echo "   tail -f $LOG_PRODUCER"
-echo ""
-echo "🛑 To stop the Python scripts run:"
-echo "   kill $CONSUMER_PID $PRODUCER_PID"
+echo "ℹ️  NOTE: The background Data Generator will run for 10 batches and stop."
+echo "   To generate more data, or use interactive demonstrations, run:"
+echo "   python generate_transactions.py"
 echo "========================================"
+echo "🛑 To stop the pipeline later, run: ./stop.sh"
+echo "========================================"
+echo ""
+
+read -p "👀 Do you want to see the live logs right now? (y/n): " SHOW_LOGS
+
+if [[ "$SHOW_LOGS" =~ ^[Yy]$ ]]; then
+    echo "Streaming logs... (Press Ctrl+C to exit logs. The pipeline will keep running in background)"
+    echo "----------------------------------------"
+    # tail -f on both files interleaved
+    tail -f "$LOG_CONSUMER" "$LOG_PRODUCER"
+else
+    echo "📝 To see logs later, run: tail -f $LOG_CONSUMER $LOG_PRODUCER"
+    echo "✅ Setup complete. Terminal freed."
+fi

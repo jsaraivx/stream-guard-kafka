@@ -17,12 +17,25 @@ pkill -f "python generate_transactions.py"
 echo "✅ Python processes terminated."
 echo ""
 
-# 2. Tear down Docker containers and wipe volumes
-echo "[2/2] 🐳 Tearing down Docker containers and wiping volumes (-v)..."
+# 2. Tear down Docker containers
+echo "[2/2] 🐳 Tearing down Docker containers..."
 cd "$PROJECT_DIR" || exit
-docker-compose down -v
 
 echo ""
-echo "========================================"
-echo "✨ PIPELINE AND DATA SUCCESSFULLY CLEARED!"
-echo "========================================"
+read -p "🗑️  Type 'all' to delete ALL data volumes (PostgreSQL/Kafka), or just press Enter to keep data: " DELETE_CHOICE
+
+if [[ "$DELETE_CHOICE" == "all" ]]; then
+    echo "Tearing down containers AND wiping volumes (-v)..."
+    docker-compose down -v
+    echo ""
+    echo "========================================"
+    echo "✨ PIPELINE AND DATA SUCCESSFULLY CLEARED!"
+    echo "========================================"
+else
+    echo "Tearing down containers (Data will be preserved)..."
+    docker-compose down
+    echo ""
+    echo "========================================"
+    echo "💤 PIPELINE STOPPED (Data preserved)."
+    echo "========================================"
+fi
