@@ -80,7 +80,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   # ksqlDB CLI - Interactive Query Interface
   ksqldb-cli:
@@ -91,7 +91,7 @@ services:
     networks:
       - stream-guard-network
     entrypoint: /bin/sh
-    command: -c "echo 'Waiting for ksqlDB...' && sleep 30 && ksql http://ksqldb-server:8088 --file /ksqldb/init.sql && tail -f /dev/null"
+    command: -c "echo 'Waiting for ksqlDB...' && sleep 15 && ksql http://ksqldb-server:8088 --file /ksqldb/init.sql && tail -f /dev/null"
     volumes:
       - ./ksqldb:/ksqldb
     tty: true
