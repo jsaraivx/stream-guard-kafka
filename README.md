@@ -201,8 +201,8 @@ ORDER BY fraud_rate DESC;
 - [x] Python Producer (Faker)
 - [x] Fake Transaction Generator with realistic distributions
 - [x] Kafka Producer with batch and streaming modes
-- [ ] ksqlDB Queries implementation (Streams & Tables)
-- [ ] Python Consumer for persistence
+- [x] ksqlDB Queries implementation (Streams & Tables)
+- [x] Python Consumer for persistence
 - [ ] Dashboard in Streamlit/PowerBI
 - [ ] CI/CD with GitHub Actions
 - [ ] Migration to Serverless (Upstash + Cloud Run)
